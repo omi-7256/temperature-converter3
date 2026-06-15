@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Converter</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --error-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .converter-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .results-container {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #edf2f7;
+            display: none;
+        }
+
+        .results-title {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-item {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .result-item span {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="converter-card">
+        <h1>Temperature Converter</h1>
+        
+        <div class="input-group">
+            <label for="tempInput">Enter Temperature</label>
+            <input type="number" id="tempInput" placeholder="e.g., 25" step="any" required>
+            <div class="error-message" id="errorMsg">Please enter a valid number.</div>
+        </div>
+
+        <div class="input-group">
+            <label for="unitSelect">From Unit</label>
+            <select id="unitSelect">
+                <option value="C">Celsius (°C)</option>
+                <option value="F">Fahrenheit (°F)</option>
+                <option value="K">Kelvin (K)</option>
+            </select>
+        </div>
+
+        <button id="convertBtn">Convert</button>
+
+        <div class="results-container" id="resultsContainer">
+            <div class="results-title">Converted Values</div>
+            <div id="result1" class="result-item"></div>
+            <div id="result2" class="result-item"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('convertBtn').addEventListener('click', function() {
+            const tempInput = document.getElementById('tempInput');
+            const unitSelect = document.getElementById('unitSelect');
+            const errorMsg = document.getElementById('errorMsg');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const result1 = document.getElementById('result1');
+            const result2 = document.getElementById('result2');
+
+            // 1. Validation check
+            // Although input type="number" restricts most non-numeric text, 
+            // empty inputs or browser edge cases still need explicit validation.
+            if (tempInput.value === '' || isNaN(tempInput.value)) {
+                errorMsg.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            errorMsg.style.display = 'none';
+            const value = parseFloat(tempInput.value);
+            const sourceUnit = unitSelect.value;
+
+            let c, f, k;
+
+            // 2. Conversion Logic
+            switch (sourceUnit) {
+                case 'C':
+                    c = value;
+                    f = (value * 9/5) + 32;
+                    k = value + 273.15;
+                    
+                    result1.innerHTML = `Fahrenheit: <span>${formatNum(f)} °F</span>`;
+                    result2.innerHTML = `Kelvin: <span>${formatNum(k)} K</span>`;
+                    break;
+                    
+                case 'F':
+                    f = value;
+                    c = (value - 32) * 5/9;
+                    k = c + 273.15;
+                    
+                    result1.innerHTML = `Celsius: <span>${formatNum(c)} °C</span>`;
+                    result2.innerHTML = `Kelvin: <span>${formatNum(k)} K</span>`;
+                    break;
+                    
+                case 'K':
+                    k = value;
+                    c = value - 273.15;
+                    f = (c * 9/5) + 32;
+                    
+                    result1.innerHTML = `Celsius: <span>${formatNum(c)} °C</span>`;
+                    result2.innerHTML = `Fahrenheit: <span>${formatNum(f)} °F</span>`;
+                    break;
+            }
+
+            // 3. Display Results
+            resultsContainer.style.display = 'block';
+        });
+
+        // Helper function to keep decimals clean (max 2 decimal places, removes trailing zeros)
+        function formatNum(num) {
+            return parseFloat(num.toFixed(2));
+        }
+
+        // Clear error message when user starts typing again
+        document.getElementById('tempInput').addEventListener('input', function() {
+            document.getElementById('errorMsg').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
